@@ -11,7 +11,7 @@ import catchAsyncError from "../utils/catchAsyncError.js";
 export const farmerRegister = catchAsyncError(async (req, res, next) => {
   const farmerExists = await Farmer.findOne({ email: req.body.email });
   if (farmerExists) {
-    return next(new ErrorHandler("Farmer already exists", 409));
+    return next(new ErrorHandler("Farmer already exists", 401));
   }
 
   const password = req.body.password;
@@ -27,7 +27,7 @@ export const farmerRegister = catchAsyncError(async (req, res, next) => {
 
   const savedfarmer = await newfarmer.save();
 
-  res.status(200).send({
+  res.status(201).send({
     message: "User account created successfully",
     success: true,
     token: token,
