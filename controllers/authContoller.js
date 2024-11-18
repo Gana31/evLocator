@@ -11,7 +11,7 @@ import catchAsyncError from "../utils/catchAsyncError.js";
 export const farmerRegister = catchAsyncError(async (req, res, next) => {
   const farmerExists = await Farmer.findOne({ email: req.body.email });
   if (farmerExists) {
-    return next(new ErrorHandler("Farmer already exists", 401));
+    return next(new ErrorHandler("User already exists", 401));
   }
 
   const password = req.body.password;
