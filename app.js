@@ -16,7 +16,7 @@ app.use(cors({
 }))
 
 app.get('/',(req,res)=>{
-    res.json({message:'Welcome to Farm server'});
+    res.json({message:'Welcome to EvLocator server'});
 })
 
 app.use('/api',authRoutes);
