@@ -19,7 +19,6 @@ const farmerSchema = new mongoose.Schema({
       },
       mobile: {
         type: Number,
-        required: true,
       },
       farm:{
           type: Array,
