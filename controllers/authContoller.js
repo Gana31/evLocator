@@ -13,7 +13,7 @@ export const farmerRegister = catchAsyncError(async (req, res, next) => {
   if (farmerExists) {
     return next(new ErrorHandler("User already exists", 401));
   }
-console.log(req.body)
+// console.log(req.body)
   const password = req.body.password;
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(password, salt);
@@ -26,7 +26,7 @@ console.log(req.body)
   });
 
   const savedfarmer = await newfarmer.save();
-
+  // console.log(salt)
   res.status(201).send({
     message: "User account created successfully",
     success: true,
@@ -61,4 +61,29 @@ export const farmerLogin = catchAsyncError(async (req, res, next) => {
 });
 
 
+export const updateProfile = catchAsyncError(async (req, res, next) => {
+  const { firstName, lastName, email, phone, profilePic } = req.body;
 
+  const farmer = await farmerModel.findById(req.user.id);
+
+  if (!farmer) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  // Update the profile fields only if they are provided
+  if (firstName) farmer.firstName = firstName;
+  if (lastName) farmer.lastName = lastName;
+  if (email) farmer.email = email;
+  if (phone) farmer.phone = phone;
+  if (profilePic) farmer.profilePic = profilePic;
+
+  // Save the updated farmer profile
+  await farmer.save();
+
+  // Return response with updated user data
+  res.status(200).json({
+    message: "Profile updated successfully",
+    success: true,
+    user: farmer,
+  });
+});

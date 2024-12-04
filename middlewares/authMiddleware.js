@@ -1,6 +1,6 @@
-import { verify } from 'jsonwebtoken';
-import { findById } from '../models/studentModel';
-import ErrorHandler from '../utils/errorHandler';
+import Jwt from 'jsonwebtoken'
+import ErrorHandler from '../utils/errorHandler.js';
+import farmerModel from '../models/farmerModel.js';  // Correct import
 
 // Middleware to authenticate the user using JWT token
 export async function auth(req, res, next) {
@@ -11,9 +11,9 @@ export async function auth(req, res, next) {
   }
 
   try {
-    const decodedToken = verify(token, process.env.JWT_SECRET);
+    const decodedToken = Jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await findById(decodedToken.id);
+    const user = await farmerModel.findById(decodedToken.id);  // Using correct model here
 
     if (!user) {
       return next(new ErrorHandler('User not found', 404));
@@ -30,7 +30,7 @@ export async function auth(req, res, next) {
 export async function isAdmin(req, res, next) {
   try {
     const userId = req.user.id;
-    const user = await findById(userId).select('+password');
+    const user = await farmerModel.findById(userId).select('+password');  // Using correct model here
 
     if (!user) {
       return next(new ErrorHandler('Invalid token. User not found.', 401));
