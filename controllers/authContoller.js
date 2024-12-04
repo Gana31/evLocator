@@ -39,7 +39,7 @@ export const farmerLogin = catchAsyncError(async (req, res, next) => {
   const farmer = await Farmer.findOne({ email: req.body.email });
 
   if (!farmer) {
-    return next(new ErrorHandler("User does not exist", 404));
+    return next(new ErrorHandler("User does not exist", 401));
   }
 
   const isMatch = bcrypt.compareSync(req.body.password, farmer.password);
