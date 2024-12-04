@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Farmer from "../models/farmerModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import catchAsyncError from "../utils/catchAsyncError.js";
+import farmerModel from "../models/farmerModel.js";
 
 
 
@@ -71,11 +72,11 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
   }
 
   // Update the profile fields only if they are provided
-  if (firstName) farmer.firstName = firstName;
-  if (lastName) farmer.lastName = lastName;
+  if (firstName) farmer.firstname = firstName;
+  if (lastName) farmer.lastname = lastName;
   if (email) farmer.email = email;
-  if (phone) farmer.phone = phone;
-  if (profilePic) farmer.profilePic = profilePic;
+  if (phone) farmer.mobile = phone;
+  if (profilePic) farmer.avatar = profilePic;
 
   // Save the updated farmer profile
   await farmer.save();
