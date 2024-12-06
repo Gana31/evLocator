@@ -1,43 +1,38 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import Farmer from "../models/farmerModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import catchAsyncError from "../utils/catchAsyncError.js";
 import farmerModel from "../models/farmerModel.js";
-
-
-
-//farmer
-
+// Farmer Registration
 export const farmerRegister = catchAsyncError(async (req, res, next) => {
-  const farmerExists = await Farmer.findOne({ email: req.body.email });
+  const farmerExists = await farmerModel.findOne({ email: req.body.email }); // Use farmernModel
   if (farmerExists) {
     return next(new ErrorHandler("User already exists", 401));
   }
-// console.log(req.body)
+
   const password = req.body.password;
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(password, salt);
   req.body.password = hashedPassword;
 
-  const newfarmer = new Farmer(req.body);
+  const newFarmer = new farmerModel(req.body); // Use farmernModel
 
-  const token = jwt.sign({ id: newfarmer._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: newFarmer._id }, process.env.JWT_SECRET, {
     expiresIn: "1d",
   });
 
-  const savedfarmer = await newfarmer.save();
-  // console.log(salt)
+  const savedFarmer = await newFarmer.save(); // Save using farmernModel
   res.status(201).send({
     message: "User account created successfully",
     success: true,
     token: token,
-    user: savedfarmer,
+    user: savedFarmer,
   });
 });
 
+// Farmer Login
 export const farmerLogin = catchAsyncError(async (req, res, next) => {
-  const farmer = await Farmer.findOne({ email: req.body.email });
+  const farmer = await farmerModel.findOne({ email: req.body.email }); // Use farmernModel
 
   if (!farmer) {
     return next(new ErrorHandler("User does not exist", 401));
@@ -61,11 +56,11 @@ export const farmerLogin = catchAsyncError(async (req, res, next) => {
   });
 });
 
-
+// Update Profile
 export const updateProfile = catchAsyncError(async (req, res, next) => {
   const { firstName, lastName, email, phone, profilePic } = req.body;
 
-  const farmer = await farmerModel.findById(req.user.id);
+  const farmer = await farmerModel.findById(req.user.id); // Use farmernModel
 
   if (!farmer) {
     return next(new ErrorHandler("User not found", 404));
@@ -81,7 +76,6 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
   // Save the updated farmer profile
   await farmer.save();
 
-  // Return response with updated user data
   res.status(200).json({
     message: "Profile updated successfully",
     success: true,

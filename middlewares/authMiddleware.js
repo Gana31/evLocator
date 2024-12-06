@@ -5,9 +5,9 @@ import farmerModel from '../models/farmerModel.js';
 // Middleware to authenticate the user using JWT token
 export async function auth(req, res, next) {
   let token = req.header('Authorization');
-
   // Check if token exists and split the string to remove 'Bearer'
   if (token && token.startsWith('Bearer ')) {
+   
     token = token.split(' ')[1]; // This will get the actual token part
   } else {
     return next(new ErrorHandler('Invalid token format', 401));
