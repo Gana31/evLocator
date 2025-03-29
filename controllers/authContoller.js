@@ -50,30 +50,30 @@ export const farmerRegister = catchAsyncError(async (req, res, next) => {
 });
 
 // Farmer Login
-// export const farmerLogin = catchAsyncError(async (req, res, next) => {
-//   const farmer = await farmerModel.findOne({ email: req.body.email }); // Use farmernModel
+export const farmerLogin = catchAsyncError(async (req, res, next) => {
+  const farmer = await farmerModel.findOne({ email: req.body.email }); // Use farmernModel
 
-//   if (!farmer) {
-//     return next(new ErrorHandler("User does not exist", 401));
-//   }
+  if (!farmer) {
+    return next(new ErrorHandler("User does not exist", 401));
+  }
 
-//   const isMatch = bcrypt.compareSync(req.body.password, farmer.password);
+  const isMatch = bcrypt.compareSync(req.body.password, farmer.password);
 
-//   if (!isMatch) {
-//     return next(new ErrorHandler("Invalid email or password", 401));
-//   }
+  if (!isMatch) {
+    return next(new ErrorHandler("Invalid email or password", 401));
+  }
 
-//   const token = jwt.sign({ id: farmer._id }, process.env.JWT_SECRET, {
-//     expiresIn: "1d",
-//   });
+  const token = jwt.sign({ id: farmer._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
 
-//   res.status(200).send({
-//     message: "Login successful",
-//     success: true,
-//     token: token,
-//     user: farmer,
-//   });
-// });
+  res.status(200).send({
+    message: "Login successful",
+    success: true,
+    token: token,
+    user: farmer,
+  });
+});
 
 // Update Profile
 export const updateProfile = catchAsyncError(async (req, res, next) => {
