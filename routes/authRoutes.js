@@ -11,7 +11,7 @@ router.post("/register", farmerRegister);
 
 //---------------------Login--------------------------
 
-// router.post("/login", farmerLogin);
+ router.post("/login", farmerLogin);
 
 router.put("/updateProfile",auth, updateProfile)
 
