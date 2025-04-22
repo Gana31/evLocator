@@ -65,7 +65,7 @@ export const bookSlot = catchAsyncError(async (req, res, next) => {
       slot: newSlot,
     });
   } catch (error) {
-    console.log("Error during slot booking:", error); // Log the full error
+    // console.log("Error during slot booking:", error); // Log the full error
 
     // Handle known error types (e.g., validation errors) and send a response
     if (error instanceof ErrorHandler) {
@@ -85,7 +85,8 @@ export const bookSlot = catchAsyncError(async (req, res, next) => {
 });
 
 export const getAvailableSlots = catchAsyncError(async (req, res, next) => {
-  const { stationId, connectorId } = req.query;
+  try {
+    const { stationId, connectorId } = req.query;
 
   // Validate input
   if (!stationId || !connectorId) {
@@ -104,20 +105,20 @@ export const getAvailableSlots = catchAsyncError(async (req, res, next) => {
   const currentDateTime = new Date();
 
   // Helper to convert a date to YYYY-DD-MM format
-  const toYYYYDDMM = (date) => {
+  const toYYYYMMDD = (date) => {
     const year = date.getFullYear();
-    const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
-    return `${year}-${day}-${month}`;
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
-  const todayDate = toYYYYDDMM(currentDateTime); // Format: YYYY-DD-MM
+  const todayDate = toYYYYMMDD(currentDateTime); // Format: YYYY-DD-MM
   const currentTimeInMinutes = currentDateTime.getHours() * 60 + currentDateTime.getMinutes();
 
   // Get tomorrow's date
   const tomorrowDate = new Date(currentDateTime);
   tomorrowDate.setDate(currentDateTime.getDate() + 1);
-  const tomorrowDateString = toYYYYDDMM(tomorrowDate); // Format: YYYY-DD-MM
+  const tomorrowDateString = toYYYYMMDD(tomorrowDate); // Format: YYYY-DD-MM
 
   // console.log("Today's Date:", todayDate);
   // console.log("Tomorrow's Date:", tomorrowDateString);
@@ -200,6 +201,19 @@ export const getAvailableSlots = catchAsyncError(async (req, res, next) => {
     today: todayDate,
     tomorrow: tomorrowDateString
   });
+    
+  } catch (error) {
+    // console.error("Error fetching booking slot:", error);
+
+    // Handle unexpected errors
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching booking slot.",
+      error: error.message || error,
+    });
+  
+    
+  }
 });
 
 

@@ -51,6 +51,7 @@ export const farmerRegister = catchAsyncError(async (req, res, next) => {
 
 // Farmer Login
 export const farmerLogin = catchAsyncError(async (req, res, next) => {
+ try {
   const farmer = await farmerModel.findOne({ email: req.body.email }); // Use farmernModel
 
   if (!farmer) {
@@ -73,6 +74,9 @@ export const farmerLogin = catchAsyncError(async (req, res, next) => {
     token: token,
     user: farmer,
   });
+ } catch (error) {
+  console.log(error)
+ }
 });
 
 // Update Profile
