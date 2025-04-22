@@ -9,48 +9,46 @@ export const bookSlot = catchAsyncError(async (req, res, next) => {
     const { connectorId, date, startTime, endTime ,stationId,stationName,stationImage} = req.body;
     // console.log(req.body);
     // Convert the input date to a Date object (ensure it’s in the local time zone)
-    const bookingDate = new Date(date);
-    
-    // Convert the local date to UTC
-    const utcBookingDate = new Date(bookingDate.getTime() - bookingDate.getTimezoneOffset() * 60000);  // Adjust for the timezone offset
-    
-    // Extract the start and end time in minutes (converted from 'HH:MM' format)
+    const [day, month, year] = date.split('-').map(Number);
+    const bookingDate = new Date(Date.UTC(year, month - 1, day)); // Month is 0-indexed
+
+    // Extract the start and end time in minutes
     const bookingTimeStart = parseInt(startTime.split(":")[0]) * 60 + parseInt(startTime.split(":")[1]);
     const bookingTimeEnd = parseInt(endTime.split(":")[0]) * 60 + parseInt(endTime.split(":")[1]);
 
-    // Get the current date and time in the user's local timezone (use Date methods)
+    // Get the current date and time
     const currentDate = new Date();
-    const localMidnight = new Date(currentDate.setHours(0, 0, 0, 0));  // Today's midnight in local time
-    const tomorrowDate = new Date(localMidnight);
-    tomorrowDate.setDate(localMidnight.getDate() + 1); 
+    const localMidnight = new Date(currentDate);
+    localMidnight.setHours(0, 0, 0, 0); // Set time to today's midnight
 
- 
-    // Ensure the booking time is not in the past
-    if (utcBookingDate.getTime() === localMidnight.getTime() && bookingTimeStart <= (currentDate.getHours() * 60 + currentDate.getMinutes())) {
+    // Check if booking is for today and in the past
+    const isSameDate =
+      bookingDate.getUTCFullYear() === currentDate.getFullYear() &&
+      bookingDate.getUTCMonth() === currentDate.getMonth() &&
+      bookingDate.getUTCDate() === currentDate.getDate();
+
+    if (isSameDate && bookingTimeStart <= (currentDate.getHours() * 60 + currentDate.getMinutes())) {
       return next(new ErrorHandler("You cannot book a past time slot.", 400));
     }
 
-    // Check if the selected slot is available for the connector (prevent overlapping)
+    // Check for overlapping slot
     const overlappingSlots = await slotbookingmodel.find({
       stationId,
       connectorId,
-      date: new Date(utcBookingDate), // Ensure you're checking the date in UTC
-      startTime: startTime, // Check for exact start time match
-      endTime: endTime,     // Check for exact end time match
+      date: bookingDate,
+      startTime,
+      endTime,
     });
 
-    // console.log("Overlapping Slots for the connector: ", overlappingSlots);
-    
-    // If there's any overlap with the selected connector, return an error
     if (overlappingSlots.length > 0) {
       return next(new ErrorHandler("The selected time slot is unavailable for this connector.", 400));
     }
 
-    // If no overlapping slots, proceed with the booking
+    // Create the slot
     const newSlot = await slotbookingmodel.create({
       stationId,
       connectorId,
-      date: utcBookingDate, // Store the booking date in UTC
+      date: bookingDate,
       startTime,
       endTime,
       stationName,
@@ -58,16 +56,14 @@ export const bookSlot = catchAsyncError(async (req, res, next) => {
       userId: req.user.id,
     });
 
-    // Send success response with the new booking details
     res.status(201).json({
       success: true,
       message: "Slot booked successfully",
       slot: newSlot,
     });
   } catch (error) {
-    // console.log("Error during slot booking:", error); // Log the full error
+    console.log("Error during slot booking:", error);
 
-    // Handle known error types (e.g., validation errors) and send a response
     if (error instanceof ErrorHandler) {
       return res.status(error.statusCode).json({
         success: false,
@@ -75,7 +71,6 @@ export const bookSlot = catchAsyncError(async (req, res, next) => {
       });
     }
 
-    // Generic error handler for unexpected errors
     return res.status(500).json({
       success: false,
       message: "An unexpected error occurred",
